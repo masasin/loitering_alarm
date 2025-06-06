@@ -55,6 +55,7 @@ class LoiteringAlarm:
     def _update_times(self, distance: float) -> None:
         if self.min_distance_cm <= distance <= self.max_distance_cm:
             self._elapsed_time += self.RESOLUTION
+            self._occluded_time = 0
             return
 
         if self._elapsed_time == 0:
