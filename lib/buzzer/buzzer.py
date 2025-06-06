@@ -53,6 +53,14 @@ class Buzzer:
     def is_active(self) -> bool:
         return self._is_active
 
+    @property
+    def is_on(self) -> bool:
+        return self.hardware.is_on
+
+    @property
+    def is_off(self) -> bool:
+        return not self.is_on
+
     def beep(
         self,
         duration_ms: int,

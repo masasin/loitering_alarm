@@ -34,6 +34,17 @@ class Pin(machine.Pin):
     def off(self) -> None:
         self.value = 0
 
+    def toggle(self):
+        self.value = 1 - self.value
+
+    @property
+    def is_on(self) -> bool:
+        return self.value == 1
+
+    @property
+    def is_off(self) -> bool:
+        return not self.is_on
+
     def send_pulse_us(self, duration_us: int, *, high: bool = True) -> None:
         base_level = 0 if high else 1
         pulse_level = 1 if high else 0
@@ -90,6 +101,14 @@ class PWM:
 
     def off(self) -> None:
         self.pwm.duty_u16(0)
+
+    @property
+    def is_on(self) -> bool:
+        return self.pwm.duty_u16() > 0
+
+    @property
+    def is_off(self) -> bool:
+        return not self.is_on
 
     def send_pulse_us(
         self,
