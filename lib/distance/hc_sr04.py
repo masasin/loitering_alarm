@@ -1,7 +1,8 @@
 from lib.utils import Pin
+from .base import DistanceSensor
 
 
-class HC_SR04:
+class HC_SR04(DistanceSensor):
     def __init__(
         self, trigger_pin: int, echo_pin: int, echo_timeout_us: int = 10_000
     ) -> None:

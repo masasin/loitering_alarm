@@ -48,17 +48,20 @@ class Pin(machine.Pin):
         return machine.time_pulse_us(self.pin, 1 if high else 0, timeout_us)
 
 
-class PWM(machine.PWM):
+class PWM:
     DUTY_CYCLE_MAX = 65535
 
     def __init__(
-        self, pin_number: int, *args, freq: int = 5000, duty_cycle: float = 0, **kwargs
+        self,
+        pin_number: int,
+        freq: int = 5000,
+        duty_cycle: float = 0,
+        **kwargs,
     ) -> None:
         self.pwm = machine.PWM(
             machine.Pin(pin_number, machine.Pin.OUT),
             freq=freq,
             duty_u16=0,
-            *args,
             **kwargs,
         )
         self._duty_cycle = duty_cycle
