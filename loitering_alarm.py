@@ -33,7 +33,7 @@ class LoiteringAlarm:
                 continue
 
             self._write_distance(distance)
-            self._write_elapsed_time()
+            self._write_times()
 
             self._update_times(distance)
 
@@ -45,12 +45,16 @@ class LoiteringAlarm:
         self.display.set_cursor(0, 0)
         self.display.write(f"{distance:5.1f} cm")
 
-    def _write_elapsed_time(self) -> None:
-        countdown = max(0, self.alert_after_seconds - self._elapsed_time)
+    def _write_times(self) -> None:
+        countdown = abs(self.alert_after_seconds - self._elapsed_time)
         minutes, seconds = divmod(countdown, 60)
 
         self.display.set_cursor(1, 0)
         self.display.write(f"{minutes:02.0f}:{seconds:02.0f}")
+
+        time_to_timeout = self.timeout_seconds - self._occluded_time
+        self.display.set_cursor(1, 6)
+        self.display.write(f"{time_to_timeout:02.0f}")
 
     def _update_times(self, distance: float) -> None:
         if self.min_distance_cm <= distance <= self.max_distance_cm:
