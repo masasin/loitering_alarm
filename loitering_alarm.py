@@ -1,6 +1,6 @@
 from time import sleep
 
-from lib import LCD, Buzzer, DistanceSensor
+from lib import LCD, Buzzer, DistanceSensor, Pin
 
 
 class LoiteringAlarm:
@@ -26,6 +26,8 @@ class LoiteringAlarm:
         self.alert_after_seconds = alert_after_seconds
         self.timeout_seconds = timeout_seconds
         self.debug = debug
+        self.led = Pin(25, Pin.OUT)
+        self.led.on()
 
         self._elapsed_time = 0
         self._occluded_time = 0
@@ -46,10 +48,8 @@ class LoiteringAlarm:
             self._write_data(distance)
 
             self._update_times(distance)
-
             self._trigger_buzzer()
-
-            sleep(self.RESOLUTION)
+            self._flash_led()
 
     def _write_data(self, distance: float) -> None:
         for writer in self._writers:
@@ -73,6 +73,18 @@ class LoiteringAlarm:
         if self._occluded_time >= self.timeout_seconds:
             self._elapsed_time = 0
             self._occluded_time = 0
+
+    def _flash_led(self) -> None:
+        if self.elapsed_time == 0:
+            self.led.on()
+            sleep(self.RESOLUTION)
+            return
+
+        if self._occluded_time > 0:
+            self.led.send_pulse_us(self.RESOLUTION * 5e5, high=self.led.is_off)
+            self.led.send_pulse_us(self.RESOLUTION * 5e5, high=self.led.is_off)
+        else:
+            self.led.send_pulse_us(self.RESOLUTION * 1e6, high=self.led.is_off)
 
     def _trigger_buzzer(self) -> None:
         if self._elapsed_time < self.alert_after_seconds:
