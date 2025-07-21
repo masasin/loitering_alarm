@@ -45,14 +45,14 @@ class Pin(machine.Pin):
     def is_off(self) -> bool:
         return not self.is_on
 
-    def send_pulse_us(self, duration_us: int, *, high: bool = True) -> None:
+    def send_pulse_us(self, duration_us: float | int, *, high: bool = True) -> None:
         base_level = 0 if high else 1
         pulse_level = 1 if high else 0
 
         self.value = base_level
         time.sleep_us(2)
         self.value = pulse_level
-        time.sleep_us(duration_us)
+        time.sleep_us(int(duration_us - 2))
         self.value = base_level
 
     def time_pulse_us(self, *, high: bool = True, timeout_us: int = 1_000_000) -> int:
