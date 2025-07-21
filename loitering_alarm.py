@@ -92,7 +92,8 @@ class LoiteringAlarm:
                 self.buzzer.off()
             return
 
-        self.buzzer.on()
+        if self._occluded_time == 0:
+            self.buzzer.on()
 
     def _format_mmss(self, seconds: float) -> str:
         minutes, seconds = divmod(seconds, 60)
