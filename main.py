@@ -25,7 +25,7 @@ def build_loitering_alarm(*, distance_sensor, display, buzzer):
         display=display,
         buzzer=buzzer,
         min_distance_cm=60,
-        max_distance_cm=120,
+        max_distance_cm=145,
         alert_after_seconds=5 * 60,
         timeout_seconds=30,
     )
@@ -36,7 +36,6 @@ if __name__ == "__main__":
     display = AE_AQM0802(clock_pin=17, data_pin=16)
     buzzer = Buzzer(pin_number=13, is_active=False)
 
-    # loitering_alarm = build_test_loitering_alarm(
     loitering_alarm = build_loitering_alarm(
         distance_sensor=distance_sensor,
         display=display,
