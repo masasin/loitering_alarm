@@ -6,7 +6,7 @@ from lib import (
 from loitering_alarm import LoiteringAlarm
 
 
-def build_test_loitering_alarm(*, distance_sensor, display, buzzer):
+def test_loitering_alarm(*, distance_sensor, display, buzzer):
     return LoiteringAlarm(
         distance_sensor=distance_sensor,
         display=display,
