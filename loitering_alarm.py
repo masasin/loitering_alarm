@@ -75,7 +75,7 @@ class LoiteringAlarm:
             self._occluded_time = 0
 
     def _flash_led(self) -> None:
-        if self.elapsed_time == 0:
+        if self._elapsed_time == 0:
             self.led.on()
             sleep(self.RESOLUTION)
             return
