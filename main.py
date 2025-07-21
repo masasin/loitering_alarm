@@ -15,6 +15,7 @@ def build_test_loitering_alarm(*, distance_sensor, display, buzzer):
         max_distance_cm=20,
         alert_after_seconds=10,
         timeout_seconds=5,
+        debug=True,
     )
 
 

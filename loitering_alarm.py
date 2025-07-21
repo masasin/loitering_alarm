@@ -16,6 +16,7 @@ class LoiteringAlarm:
         max_distance_cm: float = 120,
         alert_after_seconds: int = 5 * 60,
         timeout_seconds: int = 30,
+        debug: bool = False,
     ) -> None:
         self.distance_sensor = distance_sensor
         self.display = display
@@ -24,17 +25,22 @@ class LoiteringAlarm:
         self.max_distance_cm = max_distance_cm
         self.alert_after_seconds = alert_after_seconds
         self.timeout_seconds = timeout_seconds
+        self.debug = debug
 
         self._elapsed_time = 0
         self._occluded_time = 0
+
+        self._writers = []
+
+        if self.debug:
+            self._writers.append(print)
 
     def run(self):
         while True:
             if (distance := self.distance_sensor.distance) is None:
                 continue
 
-            self._write_distance(distance)
-            self._write_times()
+            self._write_data(distance)
 
             self._update_times(distance)
 
@@ -42,20 +48,13 @@ class LoiteringAlarm:
 
             sleep(self.RESOLUTION)
 
-    def _write_distance(self, distance: float) -> None:
-        self.display.set_cursor(0, 0)
-        self.display.write(f"{distance:5.1f} cm")
-
-    def _write_times(self) -> None:
-        countdown = abs(self.alert_after_seconds - self._elapsed_time)
-        minutes, seconds = divmod(countdown, 60)
-
-        self.display.set_cursor(1, 0)
-        self.display.write(f"{minutes:02.0f}:{seconds:02.0f}")
-
-        time_to_timeout = self.timeout_seconds - self._occluded_time
-        self.display.set_cursor(1, 6)
-        self.display.write(f"{time_to_timeout:02.0f}")
+    def _write_data(self, distance: float) -> None:
+        for writer in self._writers:
+            distance_str = f"{distance:5.1f} cm"
+            time_str = (
+                f"{self._format_mmss(self._countdown)} {self._time_to_timeout:02.0f}"
+            )
+            writer(f"{distance_str}\n{time_str}")
 
     def _update_times(self, distance: float) -> None:
         if self.min_distance_cm <= distance <= self.max_distance_cm:
@@ -79,3 +78,15 @@ class LoiteringAlarm:
             return
 
         self.buzzer.on()
+
+    def _format_mmss(self, seconds: float) -> str:
+        minutes, seconds = divmod(seconds, 60)
+        return f"{int(minutes):02}:{int(seconds):02}"
+
+    @property
+    def _countdown(self) -> float:
+        return abs(self.alert_after_seconds - self._elapsed_time)
+
+    @property
+    def _time_to_timeout(self) -> float:
+        return self.timeout_seconds - self._occluded_time
