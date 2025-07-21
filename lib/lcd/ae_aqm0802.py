@@ -279,6 +279,21 @@ class AE_AQM0802_I2C(LCD):
         self.send_command(cmd)
 
     def write(self, text: str):
+        lines = text.splitlines()
+
+        for row, line in enumerate(lines):
+            if row >= len(self.VALID_ADDRESSES):
+                break
+            self.write_line(row, line)
+
+    def write_line(self, row: int, text: str):
+        if not (0 <= row < len(self.VALID_ADDRESSES)):
+            raise ValueError(
+                f"Row {row} out of bounds for {len(self.VALID_ADDRESSES[0])} row display."
+            )
+
+        self.set_cursor(row, 0)
+
         for char in text:
             if char in self._ST7032_CHAR_MAP:
                 self.send_data(self._ST7032_CHAR_MAP[char])

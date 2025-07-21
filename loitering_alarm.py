@@ -35,6 +35,9 @@ class LoiteringAlarm:
         if self.debug:
             self._writers.append(print)
 
+        if self.display.is_available():
+            self._writers.append(display.write)
+
     def run(self):
         while True:
             if (distance := self.distance_sensor.distance) is None:
