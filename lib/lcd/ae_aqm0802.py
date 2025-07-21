@@ -97,6 +97,11 @@ class AE_AQM0802_I2C(LCD):
     ):
         self.i2c = I2C(0, scl=Pin(clock_pin).pin, sda=Pin(data_pin).pin, freq=400_000)
         self.addr = addr
+
+        if not self.is_available():
+            print(f"LCD at address {hex(addr)} not found.")
+            return
+
         self.reset_pin = Pin(reset_pin, Pin.OUT) if reset_pin else None
         self.full_length_bus = True
         self.single_line = False
@@ -118,6 +123,10 @@ class AE_AQM0802_I2C(LCD):
             self.display_on_off(display=True, cursor=show_cursor, blink=blinking)
             self.clear()
             self.entry_mode_set(left_to_right=True, shift=False)
+
+    def is_available(self) -> bool:
+        devices = self.i2c.scan()
+        return self.addr in devices
 
     def reset(self):
         if self.reset_pin is not None:
