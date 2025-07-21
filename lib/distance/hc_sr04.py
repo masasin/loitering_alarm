@@ -17,7 +17,6 @@ class HC_SR04(DistanceSensor):
         try:
             pulse_time = self.echo.time_pulse_us(timeout_us=self.echo_timeout_us)
             if pulse_time < 0:
-                print("Timeout occurred while waiting for echo.")
                 return
             return (pulse_time * 0.0343) / 2  # cm
         except Exception as e:
