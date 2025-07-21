@@ -81,10 +81,12 @@ class LoiteringAlarm:
             return
 
         if self._occluded_time > 0:
-            self.led.send_pulse_us(self.RESOLUTION * 5e5, high=self.led.is_off)
-            self.led.send_pulse_us(self.RESOLUTION * 5e5, high=self.led.is_off)
+            flashes_per_resolution = 5
+            pulse_length = self.RESOLUTION * 1e6 // flashes_per_resolution
+            for _ in range(flashes_per_resolution):
+                self.led.send_pulse_us(pulse_length, high=self.led.is_on)
         else:
-            self.led.send_pulse_us(self.RESOLUTION * 1e6, high=self.led.is_off)
+            self.led.send_pulse_us(self.RESOLUTION * 1e6, high=self.led.is_on)
 
     def _trigger_buzzer(self) -> None:
         if self._elapsed_time < self.alert_after_seconds:
