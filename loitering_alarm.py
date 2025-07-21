@@ -1,5 +1,6 @@
-from lib import LCD, Buzzer, DistanceSensor
 from time import sleep
+
+from lib import LCD, Buzzer, DistanceSensor
 
 
 class LoiteringAlarm:

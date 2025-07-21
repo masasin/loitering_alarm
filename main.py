@@ -1,9 +1,9 @@
 from loitering_alarm import LoiteringAlarm
 
-from lib import (
+from .lib import (
     AE_AQM0802,
-    Buzzer,
     HC_SR04,
+    Buzzer,
 )
 
 
