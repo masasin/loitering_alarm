@@ -1,112 +1,87 @@
 from time import sleep
 
-from lib import LCD, Buzzer, DistanceSensor, Pin
+from controllers import LEDController
+from lib import LCD, Buzzer, DistanceSensor
+from states import State
+from writers import Writer, lcd_formatter, serial_writer
 
 
 class LoiteringAlarm:
-    RESOLUTION = 0.5  # seconds
-
     def __init__(
         self,
         distance_sensor: DistanceSensor,
         display: LCD,
         buzzer: Buzzer,
+        monitor: LoiteringMonitor,
         *,
         min_distance_cm: float = 60,
         max_distance_cm: float = 120,
-        alert_after_seconds: int = 5 * 60,
-        timeout_seconds: int = 30,
+        led_controller: LEDController = LEDController(pin_number=25),
         debug: bool = False,
     ) -> None:
         self.distance_sensor = distance_sensor
         self.display = display
         self.buzzer = buzzer
+        self.monitor = monitor
         self.min_distance_cm = min_distance_cm
         self.max_distance_cm = max_distance_cm
-        self.alert_after_seconds = alert_after_seconds
-        self.timeout_seconds = timeout_seconds
-        self.debug = debug
-        self.led = Pin(25, Pin.OUT)
-        self.led.on()
 
-        self._elapsed_time = 0
-        self._occluded_time = 0
+        self.led = led_controller
+
+        self._action_handlers = {
+            State.IDLE: self._action_idle,
+            State.DETECTED: self._action_detected,
+            State.OCCLUDED: self._action_occluded,
+            State.ALARM: self._action_alarm,
+            State.ARMED: self._action_armed,
+        }
 
         self._writers = []
-
-        if self.debug:
-            self._writers.append(print)
-
+        if debug:
+            self._writers.append(serial_writer)
         if self.display.is_available():
-            self._writers.append(display.write)
+            self._writers.append(Writer(self.display.write, lcd_formatter))
 
     def run(self):
         while True:
             if (distance := self.distance_sensor.distance) is None:
                 continue
 
+            is_in_range = self.min_distance_cm <= distance <= self.max_distance_cm
+            self.monitor.update(is_in_range)
+
+            self._action_handlers[self.monitor.state]()
             self._write_data(distance)
 
-            self._update_times(distance)
-            self._trigger_buzzer()
-            self._flash_led()
-
     def _write_data(self, distance: float) -> None:
+        data = {
+            "distance": distance,
+            "state": self.monitor.state,
+            "time_to_alert": self.monitor.time_to_alert,
+            "time_to_reset": self.monitor.time_to_reset,
+        }
         for writer in self._writers:
-            distance_str = f"{distance:5.1f} cm"
-            time_str = (
-                f"{self._format_mmss(self._countdown)} {self._time_to_timeout:02.0f}"
-            )
-            writer(f"{distance_str}\n{time_str}")
+            writer.function(writer.formatter(data))
 
-    def _update_times(self, distance: float) -> None:
-        if self.min_distance_cm <= distance <= self.max_distance_cm:
-            self._elapsed_time += self.RESOLUTION
-            self._occluded_time = 0
-            return
+    def _action_idle(self):
+        self.led.on()
+        self.buzzer.off()
 
-        if self._elapsed_time == 0:
-            return
+    def _action_detected(self):
+        self.led.flash_detected(self.resolution)
+        self.buzzer.off()
 
-        self._elapsed_time += self.RESOLUTION
-        self._occluded_time += self.RESOLUTION
-        if self._occluded_time >= self.timeout_seconds:
-            self._elapsed_time = 0
-            self._occluded_time = 0
+    def _action_occluded(self):
+        self.led.flash_occluded(self.resolution)
+        self.buzzer.off()
 
-    def _flash_led(self) -> None:
-        if self._elapsed_time == 0:
-            self.led.on()
-            sleep(self.RESOLUTION)
-            return
+    def _action_alarm(self):
+        self.led.flash_alarm(self.resolution)
+        self.buzzer.on()
 
-        if self._occluded_time > 0:
-            flashes_per_resolution = 5
-            pulse_length = self.RESOLUTION * 1e6 // flashes_per_resolution
-            for _ in range(flashes_per_resolution):
-                self.led.send_pulse_us(pulse_length, high=self.led.is_on)
-        else:
-            self.led.send_pulse_us(self.RESOLUTION * 1e6, high=self.led.is_on)
-
-    def _trigger_buzzer(self) -> None:
-        if self._elapsed_time < self.alert_after_seconds:
-            if self.buzzer.is_on:
-                self.buzzer.off()
-            return
-
-        if self._occluded_time == 0:
-            self.buzzer.on()
-        else:
-            self.buzzer.off()
-
-    def _format_mmss(self, seconds: float) -> str:
-        minutes, seconds = divmod(seconds, 60)
-        return f"{int(minutes):02}:{int(seconds):02}"
+    def _action_armed(self):
+        self.led.flash_armed(self.resolution)
 
     @property
-    def _countdown(self) -> float:
-        return abs(self.alert_after_seconds - self._elapsed_time)
-
-    @property
-    def _time_to_timeout(self) -> float:
-        return self.timeout_seconds - self._occluded_time
+    def resolution(self) -> float:
+        return self.monitor.resolution

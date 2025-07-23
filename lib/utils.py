@@ -45,6 +45,13 @@ class Pin(machine.Pin):
     def is_off(self) -> bool:
         return not self.is_on
 
+    def pulse(self, frequency_hz: float, duration_s: float) -> None:
+        pulse_length_us = 1e6 // frequency_hz
+        n_pulses, remainder_s = divmod(duration_s, 1 / frequency_hz)
+        for _ in range(n_pulses):
+            self.send_pulse_us(pulse_length_us, high=self.is_on)
+        sleep(remainder_s)
+
     def send_pulse_us(self, duration_us: float | int, *, high: bool = True) -> None:
         base_level = int(not high)
         pulse_level = int(high)
@@ -120,3 +127,18 @@ class PWM:
         self.on(freq=freq, duty_cycle=duty_cycle)
         time.sleep_us(duration_us)
         self.off()
+
+
+class StateMachine:
+    def __init__(self, initial_state: str, transitions: dict[str, dict[str, str]]):
+        self.state = initial_state
+        self.transitions = transitions
+
+    def transition(self, event: str) -> bool:
+        if self.state in self.transitions:
+            state_transitions = self.transitions[self.state]
+            if event in state_transitions:
+                self.state = state_transitions[event]
+                return True
+
+        return False

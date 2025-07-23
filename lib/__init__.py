@@ -2,7 +2,7 @@ from .buzzer import Buzzer, Pulse
 from .distance import HC_SR04, DistanceSensor
 from .lcd import AE_AQM0802, LCD
 from .tools import scan_i2c_devices
-from .utils import PWM, Pin
+from .utils import PWM, Pin, StateMachine
 
 __all__ = [
     "AE_AQM0802",
@@ -13,5 +13,6 @@ __all__ = [
     "PWM",
     "Pin",
     "Pulse",
+    "StateMachine",
     "scan_i2c_devices",
 ]
