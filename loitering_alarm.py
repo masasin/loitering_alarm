@@ -1,3 +1,4 @@
+import time
 
 from controllers import LEDController
 from states import State
@@ -66,6 +67,7 @@ class LoiteringAlarm:
     def _action_idle(self):
         self.led.on()
         self.buzzer.off()
+        time.sleep(self.resolution)
 
     def _action_detected(self):
         self.led.flash_detected(self.resolution)
