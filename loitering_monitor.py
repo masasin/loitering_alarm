@@ -51,6 +51,14 @@ class LoiteringMonitor:
         return self._fsm.state
 
     @property
+    def elapsed_time(self) -> float:
+        return self._elapsed_time
+
+    @property
+    def occluded_time(self) -> float:
+        return self._occluded_time
+
+    @property
     def time_to_alert(self) -> float:
         return max(0, self.alert_after_seconds - self._elapsed_time)
 

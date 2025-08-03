@@ -70,7 +70,11 @@ class LoiteringAlarm:
         time.sleep(self.resolution)
 
     def _action_detected(self):
-        self.led.flash_detected(self.resolution)
+        if self.monitor.elapsed_time >= self.resolution * 2:
+            # At least two consecutive detections
+            self.led.flash_detected(self.resolution)
+        else:
+            time.sleep(self.resolution)
         self.buzzer.off()
 
     def _action_occluded(self):
