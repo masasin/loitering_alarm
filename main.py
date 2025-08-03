@@ -1,9 +1,11 @@
+from loitering_monitor import LoiteringMonitor
+
 from lib import (
     AE_AQM0802,
     HC_SR04,
     Buzzer,
 )
-from loitering_alarm import LoiteringAlarm, LoiteringMonitor
+from loitering_alarm import LoiteringAlarm
 
 
 def test_loitering_alarm(*, distance_sensor, display, buzzer, monitor):

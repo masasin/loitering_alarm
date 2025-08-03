@@ -50,7 +50,7 @@ class Pin(machine.Pin):
         n_pulses, remainder_s = divmod(duration_s, 1 / frequency_hz)
         for _ in range(n_pulses):
             self.send_pulse_us(pulse_length_us, high=self.is_on)
-        sleep(remainder_s)
+        time.sleep(remainder_s)
 
     def send_pulse_us(self, duration_us: float | int, *, high: bool = True) -> None:
         base_level = int(not high)

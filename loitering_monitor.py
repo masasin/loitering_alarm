@@ -1,5 +1,6 @@
+from states import Event, State, create_state_machine
+
 from lib import StateMachine
-from states import Event, State, StateMachine, create_state_machine
 
 
 class LoiteringMonitor:

@@ -1,3 +1,6 @@
+from lib import StateMachine
+
+
 class State:
     IDLE = "idle"
     DETECTED = "detected"
