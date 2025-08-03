@@ -8,11 +8,13 @@ class LoiteringMonitor:
         self,
         alert_after_seconds: int = 5 * 60,
         timeout_seconds: int = 30,
+        leeway_seconds: int = 5,
         resolution: float = 0.5,
         fsm: StateMachine = create_state_machine(),
     ):
         self.alert_after_seconds = alert_after_seconds
         self.timeout_seconds = timeout_seconds
+        self.leeway_seconds = leeway_seconds
         self.resolution = resolution
         self._fsm = fsm
 
@@ -30,7 +32,10 @@ class LoiteringMonitor:
         if self._elapsed_time >= self.alert_after_seconds:
             self._fsm.transition(Event.ALERT_TIME_REACHED)
 
-        if self._occluded_time >= self.timeout_seconds:
+        if (
+            self._occluded_time >= self.timeout_seconds
+            or self._elapsed_time < self.leeway_seconds
+        ):
             self._fsm.transition(Event.OCCLUSION_TIMEOUT)
 
     def _update_times(self) -> None:
