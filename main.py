@@ -20,7 +20,7 @@ def test_loitering_alarm(*, distance_sensor, display, buzzer, monitor):
     )
 
 
-def build_loitering_alarm(*, distance_sensor, display, buzzer, monitor):
+def build_loitering_alarm(*, distance_sensor, display, buzzer, monitor, debug=False):
     return LoiteringAlarm(
         distance_sensor=distance_sensor,
         display=display,
@@ -28,6 +28,7 @@ def build_loitering_alarm(*, distance_sensor, display, buzzer, monitor):
         monitor=monitor,
         min_distance_cm=75,
         max_distance_cm=145,
+        debug=debug,
     )
 
 
