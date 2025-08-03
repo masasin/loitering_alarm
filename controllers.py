@@ -5,8 +5,8 @@ class LEDController:
     def __init__(
         self,
         pin_number: int,
-        freq_detected: float = 10,
-        freq_occluded: float = 2,
+        freq_detected: float = 2,
+        freq_occluded: float = 10,
         freq_alarm: float | None = None,
         freq_armed: float | None = None,
     ):
