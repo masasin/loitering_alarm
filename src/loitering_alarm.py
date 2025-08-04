@@ -1,9 +1,10 @@
 import time
 
 from controllers import LEDController
-from lib import LCD, Buzzer, DistanceSensor
 from states import State
 from writers import Writer, lcd_formatter, serial_writer
+
+from lib import LCD, Buzzer, DistanceSensor
 
 
 class LoiteringAlarm:
