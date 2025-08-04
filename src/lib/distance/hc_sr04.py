@@ -17,6 +17,8 @@ class HC_SR04(DistanceSensor):
         try:
             pulse_time = self.echo.time_pulse_us(timeout_us=self.echo_timeout_us)
             if pulse_time < 0:
+                # -1 indicates timeout due to waiting for initial condition
+                # -2 indicates timeout due to pulse not finishing
                 return
             return (pulse_time * 0.0343) / 2  # cm
         except Exception as e:
