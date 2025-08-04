@@ -53,7 +53,7 @@ class LoiteringAlarm:
 
     def _write_data(self, distance: float) -> None:
         data = {
-            "distance": distance,
+            "distance": distance or 0,
             "state": self.monitor.state,
             "time_to_alert": self.monitor.time_to_alert,
             "time_to_reset": self.monitor.time_to_reset,
