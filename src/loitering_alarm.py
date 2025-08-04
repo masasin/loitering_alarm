@@ -44,11 +44,9 @@ class LoiteringAlarm:
 
     def run(self):
         while True:
-            if (distance := self.distance_sensor.distance) is None:
-                continue
-
-            is_in_range = self.min_distance_cm <= distance <= self.max_distance_cm
-            self.monitor.update(is_in_range)
+            if (distance := self.distance_sensor.distance) is not None:
+                is_in_range = self.min_distance_cm <= distance <= self.max_distance_cm
+                self.monitor.update(is_in_range)
 
             self._action_handlers[self.monitor.state]()
             self._write_data(distance)
